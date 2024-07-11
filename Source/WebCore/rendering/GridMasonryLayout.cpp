@@ -102,9 +102,6 @@ void GridMasonryLayout::allocateCapacityForMasonryVectors()
         m_itemsWithDefiniteGridAxisPosition.reserveCapacity(gridCapacity / m_masonryDefiniteItemsQuarterCapacity);
         m_itemsWithIndefiniteGridAxisPosition.reserveCapacity(gridCapacity / m_masonryIndefiniteItemsHalfCapacity);
     } else
-        // We use m_itemsWithDefiniteGridAxisPosition to hold all non first track items
-        // when masonry-auto-flow is set to ordered so that we can just easily iterate
-        // over the vector when placing items
         m_itemsWithDefiniteGridAxisPosition.reserveCapacity(gridCapacity);
 }
 
@@ -255,9 +252,7 @@ GridSpan GridMasonryLayout::gridAxisPositionUsingNextAutoFlow(const RenderBox& i
 
 GridArea GridMasonryLayout::gridAreaForIndefiniteGridAxisItem(const RenderBox& item)
 {
-    // Determine the logic to use for positioning based on the value of masonry-auto-flow
-    GridSpan gridAxisPosition = m_renderGrid.style().masonryAutoFlow().placementAlgorithm == MasonryAutoFlowPlacementAlgorithm::Pack ? gridAxisPositionUsingPackAutoFlow(item) : gridAxisPositionUsingNextAutoFlow(item);
-    return masonryGridAreaFromGridAxisSpan(gridAxisPosition);
+    return masonryGridAreaFromGridAxisSpan(gridAxisPositionUsingNextAutoFlow(item));
 }
 
 LayoutUnit GridMasonryLayout::offsetForChild(const RenderBox& child) const
