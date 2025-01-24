@@ -322,6 +322,15 @@ void pas_probabilistic_guard_malloc_initialize_pgm(void)
     if (!pas_probabilistic_guard_malloc_is_initialized) {
         pas_probabilistic_guard_malloc_is_initialized = true;
 
+        const char* pgm_activation_rate_env = getenv("PGM_ACTIVATION_RATE");
+        if (pgm_activation_rate_env) {
+            int pgm_activation_rate = atoi(pgm_activation_rate_env);
+            if (pgm_activation_rate > 0) {
+                pas_probabilistic_guard_malloc_random = PAS_MIN(pgm_activation_rate, 65535);
+                return;
+            }
+        }
+
         if (PAS_LIKELY(pas_get_fast_random(1000) >= 1)) {
             pas_probabilistic_guard_malloc_can_use = false;
             return;
