@@ -98,7 +98,6 @@ accessibility/AXTextMarker.cpp
 accessibility/AccessibilityARIAGridRow.cpp
 accessibility/AccessibilityImageMapLink.cpp
 accessibility/AccessibilityList.cpp
-accessibility/AccessibilityListBox.cpp
 accessibility/AccessibilityListBoxOption.cpp
 accessibility/AccessibilityMathMLElement.cpp
 accessibility/AccessibilityMenuListOption.cpp

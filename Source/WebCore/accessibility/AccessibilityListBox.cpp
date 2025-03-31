@@ -61,7 +61,7 @@ void AccessibilityListBox::addChildren()
         m_subtreeDirty = false;
     });
 
-    auto* selectElement = dynamicDowncast<HTMLSelectElement>(node());
+    RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node());
     if (!selectElement)
         return;
 
@@ -106,11 +106,11 @@ AXCoreObject::AccessibilityChildrenVector AccessibilityListBox::visibleChildren(
     return result;
 }
 
-AccessibilityObject* AccessibilityListBox::listBoxOptionAccessibilityObject(HTMLElement* element) const
+AccessibilityObject* AccessibilityListBox::listBoxOptionAccessibilityObject(RefPtr<HTMLElement> element) const
 {
     // FIXME: Why does AccessibilityMenuListPopup::menuListOptionAccessibilityObject check inRenderedDocument, but this does not?
-    if (auto* document = this->document())
-        return document->axObjectCache()->getOrCreate(element);
+    if (RefPtr document = this->document())
+        return document->axObjectCache()->getOrCreate(element.get());
     return nullptr;
 }
 
@@ -121,7 +121,7 @@ AccessibilityObject* AccessibilityListBox::elementAccessibilityHitTest(const Int
     if (!m_renderer)
         return nullptr;
     
-    Node* node = m_renderer->node();
+    RefPtr node = m_renderer->node();
     if (!node)
         return nullptr;
     
@@ -131,7 +131,7 @@ AccessibilityObject* AccessibilityListBox::elementAccessibilityHitTest(const Int
     const auto& children = const_cast<AccessibilityListBox*>(this)->unignoredChildren();
     unsigned length = children.size();
     for (unsigned i = 0; i < length; ++i) {
-        LayoutRect rect = downcast<RenderListBox>(*m_renderer).itemBoundingBoxRect(parentRect.location(), i);
+        LayoutRect rect = downcast<RenderListBox>(m_renderer.get())->itemBoundingBoxRect(parentRect.location(), i);
         // The cast to HTMLElement below is safe because the only other possible listItem type
         // would be a WMLElement, but WML builds don't use accessibility features at all.
         if (rect.contains(point)) {

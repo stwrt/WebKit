@@ -49,7 +49,7 @@ private:
     explicit AccessibilityListBox(AXID, RenderObject&);
 
     bool isAccessibilityListBoxInstance() const final { return true; }
-    AccessibilityObject* listBoxOptionAccessibilityObject(HTMLElement*) const;
+    AccessibilityObject* listBoxOptionAccessibilityObject(RefPtr<HTMLElement>) const;
     AccessibilityObject* elementAccessibilityHitTest(const IntPoint&) const final;
 };
     
