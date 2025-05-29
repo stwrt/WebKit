@@ -580,8 +580,12 @@ public:
     virtual bool isSVGImageChromeClient() const { return false; }
 
 #if ENABLE(POINTER_LOCK)
-    virtual bool requestPointerLock() { return false; }
-    virtual void requestPointerUnlock() { }
+    virtual bool requestPointerLock(CompletionHandler<void(bool)>&& completionHandler)
+    {
+        completionHandler(false);
+        return false;
+    }
+    virtual void requestPointerUnlock(CompletionHandler<void(bool)>&& completionHandler) { completionHandler(false); }
 #endif
 
     virtual FloatSize minimumWindowSize() const { return FloatSize(100, 100); };

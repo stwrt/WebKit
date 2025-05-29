@@ -2232,12 +2232,15 @@ void WKPageSetPageUIClient(WKPageRef pageRef, const WKPageUIClientBase* wkClient
         }
 
 #if ENABLE(POINTER_LOCK)
-        void requestPointerLock(WebPageProxy* page) final
+        void requestPointerLock(WebPageProxy* page, CompletionHandler<void(bool)>&& completion) final
         {
-            if (!m_client.requestPointerLock)
+            if (!m_client.requestPointerLock) {
+                completion(false);
                 return;
+            }
             
             m_client.requestPointerLock(toAPI(page), m_client.base.clientInfo);
+            completion(true);
         }
 
         void didLosePointerLock(WebPageProxy* page) final
@@ -3020,7 +3023,7 @@ void WKPageDidAllowPointerLock(WKPageRef pageRef)
 {
     CRASH_IF_SUSPENDED;
 #if ENABLE(POINTER_LOCK)
-    toImpl(pageRef)->didAllowPointerLock();
+    toImpl(pageRef)->didAllowPointerLock([](bool) { });
 #else
     UNUSED_PARAM(pageRef);
 #endif
@@ -3040,7 +3043,7 @@ void WKPageDidDenyPointerLock(WKPageRef pageRef)
 {
     CRASH_IF_SUSPENDED;
 #if ENABLE(POINTER_LOCK)
-    toImpl(pageRef)->didDenyPointerLock();
+    toImpl(pageRef)->didDenyPointerLock([](bool) { });
 #else
     UNUSED_PARAM(pageRef);
 #endif

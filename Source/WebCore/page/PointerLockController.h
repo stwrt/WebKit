@@ -27,6 +27,7 @@
 #if ENABLE(POINTER_LOCK)
 
 #include "ExceptionCode.h"
+#include "Page.h"
 #include "PointerLockOptions.h"
 
 #include <optional>
@@ -42,7 +43,6 @@ namespace WebCore {
 class Element;
 class DeferredPromise;
 class Document;
-class Page;
 class PlatformMouseEvent;
 class PlatformWheelEvent;
 class VoidCallback;
@@ -55,6 +55,9 @@ public:
     explicit PointerLockController(Page&);
     ~PointerLockController();
     void requestPointerLock(Element* target, std::optional<PointerLockOptions>&& = std::nullopt, RefPtr<DeferredPromise> = nullptr);
+
+    void ref() const;
+    void deref() const;
 
     void requestPointerUnlock();
     void requestPointerUnlockAndForceCursorVisible();

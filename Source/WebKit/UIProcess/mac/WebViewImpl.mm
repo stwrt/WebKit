@@ -2126,7 +2126,7 @@ void WebViewImpl::windowDidResize()
 void WebViewImpl::windowWillBeginSheet()
 {
 #if ENABLE(POINTER_LOCK)
-    m_page->requestPointerUnlock();
+    m_page->requestPointerUnlock([](bool) { });
 #endif
 }
 

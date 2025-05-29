@@ -40,6 +40,7 @@
 #include "PointerCaptureController.h"
 #include "UserGestureIndicator.h"
 #include "VoidCallback.h"
+#include <wtf/Ref.h>
 #include <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
@@ -62,6 +63,16 @@ PointerLockController::PointerLockController(Page& page)
 
 PointerLockController::~PointerLockController() = default;
 
+void PointerLockController::ref() const
+{
+    m_page.ref();
+}
+
+void PointerLockController::deref() const
+{
+    m_page.deref();
+}
+
 void PointerLockController::requestPointerLock(Element* target, std::optional<PointerLockOptions>&& options, RefPtr<DeferredPromise> promise)
 {
     if (!target || !target->isConnected() || m_documentOfRemovedElementWhileWaitingForUnlock) {
@@ -71,7 +82,7 @@ void PointerLockController::requestPointerLock(Element* target, std::optional<Po
         return;
     }
 
-    if (m_documentAllowedToRelockWithoutUserGesture != &target->document() && !UserGestureIndicator::processingUserGesture()) {
+    if (m_documentAllowedToRelockWithoutUserGesture != &target->document() && !UserGestureIndicator::processingUserGesture() && promise) {
         enqueueEvent(eventNames().pointerlockerrorEvent, target);
         // If the request was not started from an engagement gesture and the Document has not previously released a successful Pointer Lock with exitPointerLock():
         if (promise)
@@ -128,7 +139,13 @@ void PointerLockController::requestPointerLock(Element* target, std::optional<Po
         if (promise)
             m_promises.append(promise.releaseNonNull());
         // ChromeClient::requestPointerLock() can call back into didAcquirePointerLock(), so all state including element, options, and promise needs to be stored before it is called.
-        if (!m_page.chrome().client().requestPointerLock()) {
+
+        if (!m_page.chrome().client().requestPointerLock([this, protectedThis = Ref { *this }, promise = WTFMove(promise)](bool result) {
+            if (result)
+                didAcquirePointerLock();
+            else
+                didNotAcquirePointerLock();
+        })) {
             enqueueEvent(eventNames().pointerlockerrorEvent, target);
             rejectPromises(ExceptionCode::NotSupportedError, "Pointer lock is unavailable."_s);
             clearElement();
@@ -142,7 +159,12 @@ void PointerLockController::requestPointerUnlock()
         return;
 
     m_unlockPending = true;
-    m_page.chrome().client().requestPointerUnlock();
+    m_page.chrome().client().requestPointerUnlock([this, protectedThis = Ref { *this }](bool result) {
+        if (result)
+            didLosePointerLock();
+        else
+            didNotAcquirePointerLock();
+    });
 }
 
 void PointerLockController::requestPointerUnlockAndForceCursorVisible()
@@ -153,7 +175,12 @@ void PointerLockController::requestPointerUnlockAndForceCursorVisible()
         return;
 
     m_unlockPending = true;
-    m_page.chrome().client().requestPointerUnlock();
+    m_page.chrome().client().requestPointerUnlock([this, protectedThis = Ref { *this }](bool result) {
+        if (result)
+            this->didLosePointerLock();
+        else
+            this->didNotAcquirePointerLock();
+    });
     m_forceCursorVisibleUponUnlock = true;
 }
 

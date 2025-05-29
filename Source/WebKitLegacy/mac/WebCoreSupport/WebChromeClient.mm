@@ -733,30 +733,38 @@ void WebChromeClient::updateTextIndicator(const WebCore::TextIndicatorData& indi
 }
 
 #if ENABLE(POINTER_LOCK)
-bool WebChromeClient::requestPointerLock()
+bool WebChromeClient::requestPointerLock(CompletionHandler<void(bool)>&& completionHandler)
 {
 #if PLATFORM(MAC)
-    if (![m_webView page])
+    if (![m_webView page]) {
+        completionHandler(false);
         return false;
+    }
 
     CGDisplayHideCursor(CGMainDisplayID());
     CGAssociateMouseAndMouseCursorPosition(false);
     [m_webView page]->pointerLockController().didAcquirePointerLock();
     
+    completionHandler(true);
     return true;
 #else
+    completionHandler(false);
     return false;
 #endif
 }
 
-void WebChromeClient::requestPointerUnlock()
+void WebChromeClient::requestPointerUnlock(CompletionHandler<void(bool)>&& completionHandler)
 {
 #if PLATFORM(MAC)
     CGAssociateMouseAndMouseCursorPosition(true);
     CGDisplayShowCursor(CGMainDisplayID());
-    if ([m_webView page])
+    if ([m_webView page]) {
         [m_webView page]->pointerLockController().didLosePointerLock();
+        completionHandler(true);
+        return;
+    }
 #endif
+    completionHandler(false);
 }
 #endif
 

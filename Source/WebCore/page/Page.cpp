@@ -366,7 +366,7 @@ Page::Page(PageConfiguration&& pageConfiguration)
     , m_inspectorController(makeUniqueRefWithoutRefCountedCheck<InspectorController>(*this, WTFMove(pageConfiguration.inspectorClient)))
     , m_pointerCaptureController(makeUniqueRef<PointerCaptureController>(*this))
 #if ENABLE(POINTER_LOCK)
-    , m_pointerLockController(makeUniqueRef<PointerLockController>(*this))
+    , m_pointerLockController(makeUniqueRefWithoutRefCountedCheck<PointerLockController>(*this))
 #endif
     , m_elementTargetingController(makeUniqueRef<ElementTargetingController>(*this))
     , m_settings(Settings::create(this))
