@@ -3195,7 +3195,7 @@ void WebPageProxy::dispatchActivityStateChange()
 #if ENABLE(POINTER_LOCK)
     if (((changed & ActivityState::IsVisible) && !isViewVisible()) || ((changed & ActivityState::WindowIsActive) && !protectedPageClient()->isViewWindowActive())
         || ((changed & ActivityState::IsFocused) && !isViewFocused()))
-        requestPointerUnlock();
+        requestPointerUnlock([](bool) { });
 #endif
 
     if (changed & ActivityState::IsVisible) {
@@ -7235,7 +7235,7 @@ void WebPageProxy::didCommitLoadForFrame(IPC::Connection& connection, FrameIdent
         m_pluginMinZoomFactor = { };
         m_pluginMaxZoomFactor = { };
 #if ENABLE(POINTER_LOCK)
-        requestPointerUnlock();
+        requestPointerUnlock([](bool) { });
 #endif
         protectedPageClient->setMouseEventPolicy(mouseEventPolicy);
 #if ENABLE(PDF_HUD)
@@ -11563,7 +11563,7 @@ void WebPageProxy::resetState(ResetStateReason resetStateReason)
 #endif
 
 #if ENABLE(POINTER_LOCK)
-    requestPointerUnlock();
+    requestPointerUnlock([](bool) { });
 #endif
 
 #if ENABLE(SPEECH_SYNTHESIS)
@@ -14387,62 +14387,83 @@ void WebPageProxy::closeOverlayedViews()
 }
 
 #if ENABLE(POINTER_LOCK)
-void WebPageProxy::requestPointerLock()
+void WebPageProxy::requestPointerLock(IPC::Connection& connection, CompletionHandler<void(bool)>&& completionHandler)
 {
     ASSERT(!m_isPointerLockPending);
     ASSERT(!m_isPointerLocked);
     m_isPointerLockPending = true;
 
     if (!isViewVisible() || !isViewFocused()) {
-        didDenyPointerLock();
+        didDenyPointerLock(WTFMove(completionHandler));
         return;
     }
-    m_uiClient->requestPointerLock(this);
+
+    Ref webContentProcess = WebProcessProxy::fromConnection(connection);
+
+    m_uiClient->requestPointerLock(this, [this, protectedThis = Ref { *this }, completionHandler = WTFMove(completionHandler), webContentProcess = WTFMove(webContentProcess)] (WebCore::PointerLockRequestResult result) mutable {
+        switch (result) {
+        case WebCore::PointerLockRequestResult::Success:
+            didAllowPointerLock(WTFMove(completionHandler), WTFMove(webContentProcess));
+            break;
+        case WebCore::PointerLockRequestResult::Failure:
+            didDenyPointerLock(WTFMove(completionHandler));
+            break;
+        case WebCore::PointerLockRequestResult::Unsupported:
+            break;
+        }
+    });
 }
 
-void WebPageProxy::didAllowPointerLock()
+void WebPageProxy::didAllowPointerLock(CompletionHandler<void(bool)>&& completionHandler, Ref<WebProcessProxy> webContentProcess)
 {
-    if (!m_isPointerLockPending)
+    if (!m_isPointerLockPending) {
+        completionHandler(false);
         return;
+    }
 
     ASSERT(!m_isPointerLocked);
     m_isPointerLocked = true;
     m_isPointerLockPending = false;
+    m_webContentPointerLockProcess = webContentProcess.get();
+
 #if PLATFORM(MAC)
     CGDisplayHideCursor(CGMainDisplayID());
     CGAssociateMouseAndMouseCursorPosition(false);
 #endif
-    send(Messages::WebPage::DidAcquirePointerLock());
+
+    completionHandler(true);
 }
 
-void WebPageProxy::didDenyPointerLock()
+void WebPageProxy::didDenyPointerLock(CompletionHandler<void(bool)>&& completionHandler)
 {
-    if (!m_isPointerLockPending)
+    if (!m_isPointerLockPending) {
+        completionHandler(false);
         return;
+    }
 
     ASSERT(!m_isPointerLocked);
     m_isPointerLockPending = false;
-    send(Messages::WebPage::DidNotAcquirePointerLock());
+
+    completionHandler(false);
 }
 
-void WebPageProxy::requestPointerUnlock()
+void WebPageProxy::requestPointerUnlock(CompletionHandler<void(bool)>&& completionHandler)
 {
+    bool wasPointerLocked = m_isPointerLocked;
     if (m_isPointerLocked) {
 #if PLATFORM(MAC)
         CGAssociateMouseAndMouseCursorPosition(true);
         CGDisplayShowCursor(CGMainDisplayID());
 #endif
-        m_uiClient->didLosePointerLock(this);
-        send(Messages::WebPage::DidLosePointerLock());
     }
 
-    if (m_isPointerLockPending) {
+    if (m_isPointerLocked || m_isPointerLockPending)
         m_uiClient->didLosePointerLock(this);
-        send(Messages::WebPage::DidNotAcquirePointerLock());
-    }
 
     m_isPointerLocked = false;
     m_isPointerLockPending = false;
+
+    completionHandler(wasPointerLocked);
 }
 #endif // ENABLE(POINTER_LOCK)
 

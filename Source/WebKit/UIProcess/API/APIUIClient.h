@@ -30,6 +30,7 @@
 #include "WKPage.h"
 #include "WebEvent.h"
 #include "WebHitTestResultData.h"
+#include <WebCore/ChromeClient.h>
 #include <WebCore/CookieConsentDecisionResult.h>
 #include <WebCore/FloatRect.h>
 #include <WebCore/ModalContainerTypes.h>
@@ -191,7 +192,7 @@ public:
 #endif
 
 #if ENABLE(POINTER_LOCK)
-    virtual void requestPointerLock(WebKit::WebPageProxy*) { }
+    virtual void requestPointerLock(WebKit::WebPageProxy*, CompletionHandler<void(WebCore::PointerLockRequestResult)>&& completionHandler) { completionHandler(WebCore::PointerLockRequestResult::Failure); }
     virtual void didLosePointerLock(WebKit::WebPageProxy*) { }
 #endif
 

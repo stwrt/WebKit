@@ -29,6 +29,7 @@
 
 #import "APIContextMenuClient.h"
 #import "APIUIClient.h"
+#import <WebCore/ChromeClient.h>
 #import <WebCore/PlatformViewController.h>
 #import <wtf/RetainPtr.h>
 #import <wtf/TZoneMalloc.h>
@@ -173,7 +174,7 @@ private:
         std::optional<double> dataDetectionReferenceDate() final;
 
 #if ENABLE(POINTER_LOCK)
-        void requestPointerLock(WebPageProxy*) final;
+        void requestPointerLock(WebPageProxy*, CompletionHandler<void(WebCore::PointerLockRequestResult)>&&) final;
         void didLosePointerLock(WebPageProxy*) final;
 #endif
         

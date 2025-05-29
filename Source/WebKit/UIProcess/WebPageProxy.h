@@ -29,6 +29,7 @@
 // Use forward declarations and WebPageProxyInternals.h instead.
 #include "APIObject.h"
 #include "MessageReceiver.h"
+#include <WebCore/ChromeClient.h>
 #include <wtf/ApproximateTime.h>
 #include <wtf/CheckedRef.h>
 #include <wtf/CompletionHandler.h>
@@ -1858,9 +1859,7 @@ public:
     void requestMediaPlaybackState(CompletionHandler<void(MediaPlaybackState)>&&);
 
 #if ENABLE(POINTER_LOCK)
-    void didAllowPointerLock();
-    void didDenyPointerLock();
-    void requestPointerUnlock();
+    void requestPointerUnlock(CompletionHandler<void(bool)>&&);
 #endif
 
     void setSuppressVisibilityUpdates(bool flag);
@@ -2766,6 +2765,11 @@ public:
 
     Ref<AboutSchemeHandler> protectedAboutSchemeHandler();
 
+#if ENABLE(POINTER_LOCK)
+    WeakPtr<WebProcessProxy> webContentPointerLockProcess() { return m_webContentPointerLockProcess; }
+    void clearWebContentPointerLockProcess() { m_webContentPointerLockProcess = nullptr; }
+#endif
+
 private:
     WebPageProxy(PageClient&, WebProcessProxy&, Ref<API::PageConfiguration>&&);
     void platformInitialize();
@@ -2808,7 +2812,11 @@ private:
     void setUserAgent(String&&, IsCustomUserAgent = IsCustomUserAgent::No);
 
 #if ENABLE(POINTER_LOCK)
-    void requestPointerLock();
+    void didAllowPointerLock(CompletionHandler<void(bool)>&&, Ref<WebProcessProxy>);
+    void didDenyPointerLock(CompletionHandler<void(bool)>&&);
+    void requestPointerLock(IPC::Connection&, CompletionHandler<void(bool)>&&);
+
+    WeakPtr<WebProcessProxy> m_webContentPointerLockProcess;
 #endif
 
     void didCreateSubframe(WebCore::FrameIdentifier parent, WebCore::FrameIdentifier newFrameID, String&& frameName, WebCore::SandboxFlags, WebCore::ScrollbarMode);

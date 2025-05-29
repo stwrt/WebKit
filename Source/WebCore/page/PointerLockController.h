@@ -26,6 +26,7 @@
 
 #if ENABLE(POINTER_LOCK)
 
+#include "ChromeClient.h"
 #include "ExceptionCode.h"
 #include "PointerLockOptions.h"
 
@@ -55,6 +56,9 @@ public:
     explicit PointerLockController(Page&);
     ~PointerLockController();
     void requestPointerLock(Element* target, std::optional<PointerLockOptions>&& = std::nullopt, RefPtr<DeferredPromise> = nullptr);
+
+    void ref() const;
+    void deref() const;
 
     void requestPointerUnlock();
     void requestPointerUnlockAndForceCursorVisible();
