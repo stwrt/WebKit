@@ -36,6 +36,7 @@
 #include <wtf/MainThread.h>
 #include <wtf/OptionSet.h>
 #include <wtf/RefCounted.h>
+#include <wtf/RefPtr.h>
 #include <wtf/RobinHoodHashSet.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/URLHash.h>
@@ -217,6 +218,8 @@ public:
     WEBCORE_EXPORT Element* previousElementSibling() const;
     WEBCORE_EXPORT Element* nextElementSibling() const;
 
+    WEBCORE_EXPORT RefPtr<Element> protectedNextElementSibling() const;
+
     // From the ChildNode - https://dom.spec.whatwg.org/#childnode
     ExceptionOr<void> before(FixedVector<NodeOrString>&&);
     ExceptionOr<void> after(FixedVector<NodeOrString>&&);
@@ -315,6 +318,8 @@ public:
     inline RefPtr<ContainerNode> protectedParentOrShadowHostNode() const; // Defined in ShadowRoot.h
     ContainerNode* parentInComposedTree() const;
     WEBCORE_EXPORT Element* parentElementInComposedTree() const;
+    WEBCORE_EXPORT RefPtr<Element> protectedParentElementInComposedTree() const;
+
     Element* parentOrShadowHostElement() const;
     inline void setParentNode(ContainerNode*);
     inline Node& rootNode() const;

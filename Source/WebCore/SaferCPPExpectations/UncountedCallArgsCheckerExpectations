@@ -426,7 +426,6 @@ dom/DOMImplementation.cpp
 dom/DataTransfer.cpp
 dom/DataTransferItemList.cpp
 dom/Document.cpp
-dom/Element.cpp
 dom/ElementData.cpp
 dom/ElementInlines.h
 dom/ElementInternals.cpp

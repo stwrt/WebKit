@@ -76,6 +76,11 @@ public:
         return element.treeScope().customElementRegistry();
     }
 
+    static RefPtr<CustomElementRegistry> protectedRegistryForElement(const Element& element)
+    {
+        return registryForElement(element);
+    }
+
     static CustomElementRegistry* registryForNodeOrTreeScope(const Node& node, const TreeScope& treeScope)
     {
         if (node.usesNullCustomElementRegistry()) {
@@ -85,6 +90,11 @@ public:
         if (auto* element = dynamicDowncast<Element>(node); element && element->usesScopedCustomElementRegistryMap()) [[unlikely]]
             return scopedCustomElementRegistryMap().get(*element);
         return treeScope.customElementRegistry();
+    }
+
+    static RefPtr<CustomElementRegistry> protectedRegistryForNodeOrTreeScope(const Node& node, const TreeScope& treeScope)
+    {
+        return registryForNodeOrTreeScope(node, treeScope);
     }
 
     static void addToScopedCustomElementRegistryMap(Element&, CustomElementRegistry&);

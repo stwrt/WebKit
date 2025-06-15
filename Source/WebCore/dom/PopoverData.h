@@ -54,6 +54,7 @@ public:
     Ref<ToggleEventTask> ensureToggleEventTask(Element&);
 
     HTMLElement* invoker() const { return m_invoker.get(); }
+    RefPtr<HTMLElement> protectedInvoker() const { return invoker(); }
     void setInvoker(const HTMLElement* element) { m_invoker = element; }
 
     class ScopedStartShowingOrHiding {

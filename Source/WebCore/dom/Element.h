@@ -400,6 +400,7 @@ public:
     const ElementData* elementData() const { return m_elementData.get(); }
     static constexpr ptrdiff_t elementDataMemoryOffset() { return OBJECT_OFFSETOF(Element, m_elementData); }
     inline UniqueElementData& ensureUniqueElementData();
+    inline Ref<UniqueElementData> protectedEnsureUniqueElementData();
 
     void synchronizeAllAttributes() const;
 
@@ -775,6 +776,7 @@ public:
 #endif
 
     Style::Resolver& styleResolver();
+    Ref<Style::Resolver> protectedStyleResolver();
     Style::UnadjustedStyle resolveStyle(const Style::ResolutionContext&);
 
     // Invalidates the style of a single element. Style is resolved lazily.

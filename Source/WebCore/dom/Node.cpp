@@ -555,6 +555,11 @@ Element* Node::nextElementSibling() const
     return ElementTraversal::nextSibling(*this);
 }
 
+RefPtr<Element> Node::protectedNextElementSibling() const
+{
+    return nextElementSibling();
+}
+
 ExceptionOr<void> Node::insertBefore(Node& newChild, RefPtr<Node>&& refChild)
 {
     if (auto* containerNode = dynamicDowncast<ContainerNode>(*this))
@@ -1413,6 +1418,11 @@ Element* Node::parentElementInComposedTree() const
             return element;
     }
     return nullptr;
+}
+
+RefPtr<Element> Node::protectedParentElementInComposedTree() const
+{
+    return parentElementInComposedTree();
 }
 
 TreeScope& Node::treeScopeForSVGReferences() const

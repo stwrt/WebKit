@@ -184,6 +184,11 @@ inline UniqueElementData& Element::ensureUniqueElementData()
     return static_cast<UniqueElementData&>(*m_elementData);
 }
 
+inline Ref<UniqueElementData> Element::protectedEnsureUniqueElementData()
+{
+    return ensureUniqueElementData();
+}
+
 inline bool shouldIgnoreAttributeCase(const Element& element)
 {
     return element.isHTMLElement() && element.document().isHTMLDocument();

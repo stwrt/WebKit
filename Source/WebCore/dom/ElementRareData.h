@@ -72,6 +72,8 @@ public:
 
     PseudoElement* beforePseudoElement() const { return m_beforePseudoElement.get(); }
     PseudoElement* afterPseudoElement() const { return m_afterPseudoElement.get(); }
+    RefPtr<PseudoElement> protectedAfterPseudoElement() const { return afterPseudoElement(); }
+    RefPtr<PseudoElement> protectedBeforePseudoElement() const { return beforePseudoElement(); }
 
     void resetComputedStyle();
 
