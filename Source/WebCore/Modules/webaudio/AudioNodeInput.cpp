@@ -110,7 +110,7 @@ void AudioNodeInput::disable(AudioNodeOutput* output)
     }
 
     // Propagate disabled state to outputs.
-    node()->disableOutputsIfNecessary();
+    protectedNode()->disableOutputsIfNecessary();
 }
 
 void AudioNodeInput::enable(AudioNodeOutput* output)
@@ -134,12 +134,12 @@ void AudioNodeInput::enable(AudioNodeOutput* output)
     m_disabledOutputs.remove(output);
 
     // Propagate enabled state to outputs.
-    node()->enableOutputsIfNecessary();
+    protectedNode()->enableOutputsIfNecessary();
 }
 
 void AudioNodeInput::didUpdate()
 {
-    node()->checkNumberOfChannelsForInput(this);
+    protectedNode()->checkNumberOfChannelsForInput(this);
 }
 
 void AudioNodeInput::updateInternalBus()
@@ -210,7 +210,7 @@ void AudioNodeInput::sumAllConnections(AudioBus& summingBus, size_t framesToProc
         ASSERT(output);
 
         // Render audio from this output.
-        AudioBus& connectionBus = output->pull(nullptr, framesToProcess);
+        Ref connectionBus = output->pull(nullptr, framesToProcess);
 
         // Sum, with unity-gain.
         summingBus.sumFrom(connectionBus, interpretation);
@@ -232,7 +232,7 @@ AudioBus& AudioNodeInput::pull(AudioBus* inPlaceBus, size_t framesToProcess)
     if (!numberOfRenderingConnections()) {
         // At least, generate silence if we're not connected to anything.
         // FIXME: if we wanted to get fancy, we could propagate a 'silent hint' here to optimize the downstream graph processing.
-        m_internalSummingBus->zero();
+        protectedInternalSummingBus()->zero();
         return m_internalSummingBus;
     }
 

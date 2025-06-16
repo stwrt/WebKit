@@ -52,6 +52,7 @@ public:
 
     // Can be called from any thread.
     AudioNode* node() const { return m_node.get(); }
+    RefPtr<AudioNode> protectedNode() const { return node(); }
 
     // Must be called with the context's graph lock.
     void connect(AudioNodeOutput*);
@@ -93,6 +94,7 @@ private:
     AudioBus& internalSummingBus();
     void sumAllConnections(AudioBus& summingBus, size_t framesToProcess);
 
+    Ref<AudioBus> protectedInternalSummingBus() { return m_internalSummingBus; }
     Ref<AudioBus> m_internalSummingBus;
 };
 

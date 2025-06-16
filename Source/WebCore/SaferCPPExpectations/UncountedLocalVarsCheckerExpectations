@@ -53,8 +53,6 @@ Modules/webaudio/AudioBuffer.cpp
 Modules/webaudio/AudioBufferSourceNode.cpp
 Modules/webaudio/AudioDestinationNode.cpp
 Modules/webaudio/AudioNode.cpp
-Modules/webaudio/AudioNodeInput.cpp
-Modules/webaudio/AudioNodeOutput.cpp
 Modules/webaudio/AudioParam.cpp
 Modules/webaudio/AudioWorkletGlobalScope.cpp
 Modules/webaudio/AudioWorkletNode.cpp

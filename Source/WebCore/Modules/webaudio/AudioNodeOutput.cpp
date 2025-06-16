@@ -52,17 +52,19 @@ AudioNodeOutput::AudioNodeOutput(AudioNode* node, unsigned numberOfChannels)
 
 void AudioNodeOutput::setNumberOfChannels(unsigned numberOfChannels)
 {
+    Ref context = this->context();
+
     ASSERT(numberOfChannels <= AudioContext::maxNumberOfChannels);
-    ASSERT(context().isGraphOwner());
+    ASSERT(context->isGraphOwner());
 
     m_desiredNumberOfChannels = numberOfChannels;
 
-    if (context().isAudioThread()) {
+    if (context->isAudioThread()) {
         // If we're in the audio thread then we can take care of it right away (we should be at the very start or end of a rendering quantum).
         updateNumberOfChannels();
     } else {
         // Let the context take care of it in the audio thread in the pre and post render tasks.
-        context().markAudioNodeOutputDirty(this);
+        context->markAudioNodeOutputDirty(this);
     }
 }
 
@@ -102,7 +104,7 @@ void AudioNodeOutput::propagateChannelCount()
     if (isChannelCountKnown()) {
         // Announce to any nodes we're connected to that we changed our channel count for its input.
         for (auto& input : m_inputs.keys()) {
-            AudioNode* connectionNode = input->node();
+            RefPtr connectionNode = input->node();
             connectionNode->checkNumberOfChannelsForInput(input);
         }
     }
@@ -123,7 +125,7 @@ AudioBus& AudioNodeOutput::pull(AudioBus* inPlaceBus, size_t framesToProcess)
 
     m_inPlaceBus = isInPlace ? inPlaceBus : nullptr;
 
-    node()->processIfNecessary(framesToProcess);
+    protectedNode()->processIfNecessary(framesToProcess);
     return bus();
 }
 
@@ -224,7 +226,7 @@ void AudioNodeOutput::disconnectAllParams()
 
     // AudioParam::disconnect() changes m_params by calling removeParam().
     while (!m_params.isEmpty()) {
-        AudioParam* param = m_params.begin()->get();
+        RefPtr param = m_params.begin()->get();
         param->disconnect(this);
     }
 }
