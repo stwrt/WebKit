@@ -1,0 +1,19 @@
+<!-- webkit-test-runner [ SiteIsolationEnabled=true ] -->
+<body>
+    <script>
+        if (window.testRunner) {
+            testRunner.dumpAsText();
+            testRunner.waitUntilDone();
+        }
+
+        addEventListener("message", (event) => {
+            if (event.data === "finish test" && window.testRunner)
+                testRunner.notifyDone();
+        });
+
+    </script>
+
+    <h1>Outer frame</h1>
+
+    <iframe src="http://localhost:8000/site-isolation/resources/window-open-blob-url.html"  width="600px" height="400px" frameborder=0></iframe>
+</body>
